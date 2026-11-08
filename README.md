@@ -74,4 +74,4 @@ smart_study/
 
 ## Author
 
-Your Name, Your University / Department
+Golam Irfan Khan,CSE
