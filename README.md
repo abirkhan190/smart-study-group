@@ -28,9 +28,27 @@ Built as an IP project with **HTML, CSS, PHP, MySQL and Java**.
 
 1. Install [XAMPP](https://www.apachefriends.org/) and start **Apache** and **MySQL**.
 2. Copy this folder to `C:\xampp\htdocs\smart_study`.
-3. Open `http://localhost/phpmyadmin`, go to **Import**, and import `schema.sql`.
-4. If your MySQL root user has a password, set it in `config.php`.
-5. Open `http://localhost/smart_study/` in your browser, register an account and log in.
+3. Open `http://localhost/phpmyadmin` and create a database named `smart_study` (collation `utf8mb4_general_ci`).
+4. Create the 6 tables listed under **Database Tables** below, with the foreign keys shown there. The full SQL is in `schema.sql` for reference (you can also run it in the **SQL** tab).
+5. If your MySQL root user has a password, set it in `config.php`.
+6. Open `http://localhost/smart_study/` in your browser, register an account and log in.
+
+## PHP Concepts Used
+
+| Concept | File(s) | What it does |
+|---------|---------|--------------|
+| Database connection (PDO) | `config.php` | Connects PHP to MySQL |
+| Sessions | `config.php`, `index.php`, `logout.php` | Remembers the logged-in user, cleared on logout |
+| Page protection | `auth()` in `config.php` | Redirects to login if the user is not logged in |
+| Password hashing | `register.php`, `index.php`, `forgot.php` | `password_hash()` to store, `password_verify()` to check |
+| Prepared statements | all pages | Prevents SQL injection |
+| Form handling | `$_POST`, `$_GET` | Group search, group select, create and update forms |
+| CRUD operations | `groups.php`, `tasks.php`, `members.php` | Create, read, update and delete groups, tasks, notices and members |
+| Reusable layout (`include`) | `header.php`, `footer.php` | Navbar and footer written once, used on every page |
+| XSS protection | `e()` in `config.php` | `htmlspecialchars()` on all user-entered output |
+| Redirects | `header("Location: ...")` | Sends the user to another page after an action |
+| Permission checks | `tasks.php`, `members.php`, `group.php` | Only the group leader can edit tasks, remove members and post notices |
+| SQL JOINs and subqueries | `groups.php`, `dashboard.php`, `group.php` | Member counts, task counts and progress in one query |
 
 ## Running the Java Admin Panel
 
@@ -54,6 +72,21 @@ java -cp ".;mysql-connector-j-x.x.x.jar" StudyGroupAdmin
 - `notices`: id, group_id, user_id, message, created_at
 - `messages`: id, group_id, user_id, message, created_at
 
+### Foreign Keys (all `ON DELETE CASCADE`)
+
+| Table | Column | References |
+|-------|--------|-----------|
+| study_groups | leader_id | users.id |
+| group_members | group_id | study_groups.id |
+| group_members | user_id | users.id |
+| tasks | group_id | study_groups.id |
+| notices | group_id | study_groups.id |
+| notices | user_id | users.id |
+| messages | group_id | study_groups.id |
+| messages | user_id | users.id |
+
+Primary keys: `id` (auto increment) in every table except `group_members`, which uses (`group_id`, `user_id`). `users.email` is UNIQUE.
+
 ## Project Structure
 
 ```
@@ -72,6 +105,11 @@ smart_study/
 └── java/StudyGroupAdmin.java
 ```
 
-## Author
+## Notes
 
-Golam Irfan Khan,CSE
+- Forgot password works only for accounts registered with a recovery answer.
+- Notices and chat refresh when the page is reloaded (no JavaScript used).
+
+
+
+Your Name, Your University / Department
